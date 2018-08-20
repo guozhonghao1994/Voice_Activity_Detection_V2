@@ -17,3 +17,9 @@ Spectrogram and its moving average figures are shown firstly. Check carefully if
 ![image](https://github.com/guozhonghao1994/Voice_Activity_Detection_V2/blob/master/Figure_1.png)
 ![image](https://github.com/guozhonghao1994/Voice_Activity_Detection_V2/blob/master/Figure_1-1.png)
 
+# Known Bugs
+1. Some `.pcm` files may cause severe error.
+I highly recommend the `.wav` file as input first.
+
+2. When padding 0, in some rare cases, some harsh noise instead of silence are padded.
+
