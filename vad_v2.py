@@ -82,6 +82,7 @@ def pcm2wav(pcm_file):
 		wave_out.setsampwidth(2)
 		wave_out.setframerate(16000)
 		wave_out.writeframes(str_data)
+	print('format conversion done!')
 
 
 def padding(segment,num_channels,sample_rate):
@@ -108,7 +109,7 @@ def plotstft(audiopath, binsize=2**15, plotpath=None, colormap="jet"):
     print("freqbins: ", freqbins)
 
     plt.figure(figsize=(15, 7.5))
-    ims = np.where(ims>180,ims,0)
+    ims = np.where(ims>180,ims,0)	# for those unvoiced frames with low frequency density, set them 0 for a more clear boundary.
     plt.imshow(np.transpose(ims), origin="lower", aspect="auto", cmap=colormap, interpolation="none")
     plt.colorbar()
 
@@ -133,43 +134,47 @@ def plotstft(audiopath, binsize=2**15, plotpath=None, colormap="jet"):
 
 
 def main():
+	# pcm and wav file only
+	filename = 'test05mi.pcm'
+	if os.path.basename(filename).split(".")[1] == 'pcm':
+		pcm2wav(filename)
+		filename = filename[:-4] + '.wav'
+	s,ims,samplerate, frame_length, data = plotstft(filename)
+	mean_array = []
+	for time in range(ims.shape[0]):
+		freq_mean = np.mean(ims[time,:])
+		mean_array.append(freq_mean)
 
-    s,ims,samplerate, frame_length, data = plotstft('test05mi.wav')
-    mean_array = []
-    for time in range(ims.shape[0]):
-        freq_mean = np.mean(ims[time,:])
-        mean_array.append(freq_mean)
-
-    mean_array = moving_average(mean_array,5)
+	mean_array = moving_average(mean_array,5)
 
 	# Attention: the threshold is adjustable, which should be judged manually by 
 	# spectrogram(figure1) and frequency centroid graph(figure2)
 	
-    thres = 33
-    endpoint = []
-    for amp in range(len(mean_array)-1):
-        if (mean_array[amp] - thres) * (mean_array[amp+1] - thres) <=0:
-            endpoint.append(amp)
+	thres = 33
+	endpoint = []
+	for amp in range(len(mean_array)-1):
+		if (mean_array[amp] - thres) * (mean_array[amp+1] - thres) <=0:
+			endpoint.append(amp)
     
-    plt.plot(mean_array)
-    plt.show()
+	plt.plot(mean_array)
+	plt.show()
     
-    print(endpoint,len(endpoint))
+	print(endpoint,len(endpoint))
 
     # split * & record endpoint & write into files
-    assert len(endpoint)%2 == 0
+	assert len(endpoint)%2 == 0
     # if not, you shall adjust the thres properly. Odd endpoints give broken intervals
 
-    if not os.path.exists('./chunk'):
-        os.mkdir('./chunk')
-    for i in range(int(len(endpoint)/2)):
-        chunk = data[int(endpoint[2*i]*frame_length/2):int(endpoint[2*i+1]*frame_length/2)]	# split
-        chunk = padding(chunk,1,samplerate)	# padding 0
-        write_wave('./chunk/chunk-{}.wav'.format(i),chunk,samplerate,1)	# write
+	if not os.path.exists('./chunk'):
+		os.mkdir('./chunk')
+	for i in range(int(len(endpoint)/2)):
+		chunk = data[int(endpoint[2*i]*frame_length/2):int(endpoint[2*i+1]*frame_length/2)]	# split
+		chunk = padding(chunk,1,samplerate)	# padding 0
+		write_wave('./chunk/chunk-{}.wav'.format(i),chunk,samplerate,1)	# write
 
 
 if __name__ == '__main__':
-    main()
+	main()
 
 
 
