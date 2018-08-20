@@ -14,6 +14,6 @@ Spectrogram and its moving average figures are shown firstly. Check carefully if
 1sec zeros are padded at the both ends of the frame. 
 
 # Example
-![image]()
-![image]()
+![image](https://github.com/guozhonghao1994/Voice_Activity_Detection_V2/blob/master/Figure_1.png)
+![image](https://github.com/guozhonghao1994/Voice_Activity_Detection_V2/blob/master/Figure_1-1.png)
 
